@@ -22,28 +22,13 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            val myNavController = rememberNavController()
-
-            NavHost(
-                navController = myNavController,
-                startDestination = "Login",
-                modifier = Modifier.fillMaxSize()
-            ) {
-                composable(route = "login") {
-                    LoginScreen(onLoginSuccess = {}, onNavigateToRegister = {
-                        myNavController.navigate(route ="register")
-                    })
-                }
-                composable(route = "register") {
-                    RegisterScreen(onRegisterSuccess = {}, onNavigateToLogin = {},
-                        onBackClick = {  myNavController.popBackStack()
-                        })
-                }
+            ExploraAppTheme {
+                NavigationApp()
 
             }
-
         }
     }
 }
+
 
 

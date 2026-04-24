@@ -1,5 +1,6 @@
 package com.example.exploraapp
 
+import android.app.Activity
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -21,6 +22,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
@@ -32,6 +34,10 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.exploraapp.ui.theme.ExploraAppTheme
+import com.google.firebase.Firebase
+import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException
+import com.google.firebase.auth.FirebaseAuthInvalidUserException
+import com.google.firebase.auth.auth
 
 
 @Composable
@@ -41,10 +47,21 @@ fun RegisterScreen(
     modifier: Modifier = Modifier,
     onBackClick: () -> Unit = {}
 ) {
+    val auth = Firebase.auth
+    val activity = LocalView.current.context as Activity
+
+
+//estados
     var name by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var confirmPassword by remember { mutableStateOf("") }
+    var nameError by remember { mutableStateOf("") }
+    var emailError by remember { mutableStateOf("") }
+    var passwordError by remember { mutableStateOf("") }
+    var confirmPasswordError by remember { mutableStateOf("") }
+    var registerError by remember { mutableStateOf("") }
+
     var acceptedTerms by remember { mutableStateOf(false) }
 
     val primaryOrange = Color(0xFFE45D25)
@@ -59,6 +76,7 @@ fun RegisterScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .verticalScroll(rememberScrollState())
+                .imePadding()
                 .padding(24.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
@@ -112,10 +130,19 @@ fun RegisterScreen(
                     onValueChange = { name = it },
                     placeholder = "Tu nombre",
                     leadingIcon = Icons.Default.Person,
-                    inputBg = inputBg
+                    inputBg = inputBg,
+                    supportingText = {
+                        if (nameError.isNotEmpty()) {
+                            Text(
+                                text = nameError,
+                                color = Color.Red
+                            )
+                        }
+                    }
                 )
 
                 Spacer(modifier = Modifier.height(20.dp))
+
 
                 RegisterField(
                     label = "CORREO ELECTRÓNICO",
@@ -123,9 +150,13 @@ fun RegisterScreen(
                     onValueChange = { email = it },
                     placeholder = "hola@ejemplo.com",
                     leadingIcon = Icons.Default.Email,
-                    inputBg = inputBg
+                    inputBg = inputBg,
+                    supportingText = {
+                        if (emailError.isNotEmpty()) {
+                            Text(text = emailError, color = Color.Red)
+                        }
+                    }
                 )
-
                 Spacer(modifier = Modifier.height(20.dp))
 
                 RegisterField(
@@ -135,7 +166,12 @@ fun RegisterScreen(
                     placeholder = "........",
                     leadingIcon = Icons.Default.Lock,
                     inputBg = inputBg,
-                    isPassword = true
+                    isPassword = true,
+                    supportingText = {
+                        if (passwordError.isNotEmpty()) {
+                            Text(text = passwordError, color = Color.Red)
+                        }
+                    }
                 )
 
                 Spacer(modifier = Modifier.height(20.dp))
@@ -147,7 +183,12 @@ fun RegisterScreen(
                     placeholder = "........",
                     leadingIcon = Icons.Default.Refresh,
                     inputBg = inputBg,
-                    isPassword = true
+                    isPassword = true,
+                    supportingText = {
+                        if (confirmPasswordError.isNotEmpty()) {
+                            Text(text = confirmPasswordError, color = Color.Red)
+                        }
+                    }
                 )
             }
 
@@ -175,11 +216,47 @@ fun RegisterScreen(
                     lineHeight = 16.sp
                 )
             }
+            if (registerError.isNotEmpty()) {
+                Text(text = registerError, color = Color.Red)
+            }
+
 
             Spacer(modifier = Modifier.height(32.dp))
 
             Button(
-                onClick = { onRegisterSuccess() },
+                onClick = {
+                    val isValidName = validateName(name).first
+                    val isValidEmail = validateEmail(email).first
+                    val isValidPassword = validatePassword(password).first
+                    val isValidConfirmPassword = validateConfirmPassword(password, confirmPassword).first
+
+
+
+                    nameError = validateName(name).second
+                    emailError = validateEmail(email).second
+                    passwordError = validatePassword(password).second
+                    confirmPasswordError = validateConfirmPassword(password, confirmPassword).second
+
+                    if(isValidName && isValidEmail && isValidPassword && isValidConfirmPassword) {
+                        auth.createUserWithEmailAndPassword(email, password)
+                            .addOnCompleteListener(activity) { task ->
+                                if (task.isSuccessful) {
+                                    onRegisterSuccess()
+                                } else {
+                                    registerError = when (task.exception) {
+                                        is FirebaseAuthInvalidCredentialsException -> "Correo o contraseña incorrecta"
+                                        is FirebaseAuthInvalidUserException -> "No existe una cuenta con este correo"
+                                        else -> "Error al registrar"
+                                    }
+
+                                }
+                            }
+
+                    }else{
+                        registerError = "Error al registrar"
+                    }
+
+                },
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(64.dp),
@@ -265,7 +342,8 @@ fun RegisterField(
     leadingIcon: androidx.compose.ui.graphics.vector.ImageVector,
     inputBg: Color,
     modifier: Modifier = Modifier,
-    isPassword: Boolean = false
+    isPassword: Boolean = false,
+    supportingText: @Composable (() -> Unit)? = null
 ) {
     Column(modifier = modifier) {
         Text(
@@ -280,10 +358,10 @@ fun RegisterField(
             onValueChange = onValueChange,
             modifier = Modifier
                 .fillMaxWidth()
-                .height(56.dp)
                 .clip(RoundedCornerShape(28.dp)),
             placeholder = { Text(placeholder, color = Color.Gray) },
             leadingIcon = { Icon(leadingIcon, contentDescription = null, tint = Color.Gray) },
+            supportingText = supportingText,
             visualTransformation = if (isPassword) PasswordVisualTransformation() else androidx.compose.ui.text.input.VisualTransformation.None,
             keyboardOptions = KeyboardOptions(keyboardType = if (isPassword) KeyboardType.Password else KeyboardType.Text),
             colors = TextFieldDefaults.colors(

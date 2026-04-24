@@ -1,6 +1,7 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
+    id("com.google.gms.google-services")
 }
 
 android {
@@ -57,4 +58,11 @@ dependencies {
     debugImplementation(libs.androidx.compose.ui.test.manifest)
     val nav_version = "2.9.7"
     implementation("androidx.navigation:navigation-compose:$nav_version")
+
+    //firebase
+    implementation(platform(libs.firebase.bom))
+
+    //authentication
+    implementation(libs.firebase.auth)
+
 }

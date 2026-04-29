@@ -1,4 +1,4 @@
-package com.example.exploraapp
+package com.example.exploraapp.ui.elements
 
 import android.app.Activity
 import android.util.Log
@@ -22,12 +22,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.exploraapp.validateEmail
+import com.example.exploraapp.validatePassword
 import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException
 import com.google.firebase.auth.FirebaseAuthInvalidUserException
@@ -338,7 +341,7 @@ fun LoginScreen(
 }
 
 @Composable
-fun SocialButton(text: String, modifier: Modifier = Modifier, icon: androidx.compose.ui.graphics.vector.ImageVector) {
+fun SocialButton(text: String, modifier: Modifier = Modifier, icon: ImageVector) {
     OutlinedButton(
         onClick = { /* Handle social login */ },
         modifier = modifier.height(50.dp),

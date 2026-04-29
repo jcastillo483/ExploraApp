@@ -6,6 +6,10 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.example.exploraapp.ui.elements.AddTouristicPlaceScreen
+import com.example.exploraapp.ui.elements.HomeScreen
+import com.example.exploraapp.ui.elements.LoginScreen
+import com.example.exploraapp.ui.elements.RegisterScreen
 import com.google.firebase.Firebase
 import com.google.firebase.auth.auth
 
@@ -38,8 +42,8 @@ fun NavigationApp() {
         }
         composable(route = "register") {
             RegisterScreen(
-                onRegisterSuccess = {myNavController.navigate("home")},
-                onNavigateToLogin = {myNavController.navigate("login")},
+                onRegisterSuccess = { myNavController.navigate("home") },
+                onNavigateToLogin = { myNavController.navigate("login") },
                 onBackClick = {
                     myNavController.popBackStack()
                 }
@@ -47,10 +51,13 @@ fun NavigationApp() {
         }
 
         composable(route = "home") {
-            HomeScreen(onClickLogout = {
-                myNavController.navigate("login")
-            }
-            )
+            HomeScreen(onClickAddTouristicPlace =
+                { myNavController.navigate("addTouristicPlace") })
         }
+
+        composable(route = "addTouristicPlace") {
+            AddTouristicPlaceScreen()
+        }
+
     }
 }

@@ -25,6 +25,7 @@ import com.google.firebase.auth.auth
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen (onClickAddTouristicPlace: () -> Unit){
+
     Scaffold(
         topBar = {
             TopAppBar(title = { Text("ExploraApp") } )

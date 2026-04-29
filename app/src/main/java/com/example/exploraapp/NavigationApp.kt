@@ -27,7 +27,7 @@ fun NavigationApp() {
 
     NavHost(
         navController = myNavController,
-        startDestination = "login",
+        startDestination = myStartDestination,
         modifier = Modifier.fillMaxSize()
     ) {
         composable(route = "login") {
